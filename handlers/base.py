@@ -81,7 +81,7 @@ class BaseHandler:
             return None, "您尚未选择激活账号，请先使用 /三角洲 账号切换 命令选择账号"
         
         current_selection, _ = user_data
-        if current_selection < 1 or current_selection > len(accounts):
+        if not isinstance(current_selection, int) or current_selection < 1 or current_selection > len(accounts):
             return None, "当前选择的账号序号无效，请重新选择账号"
         
         current_account = accounts[current_selection - 1]
@@ -109,7 +109,7 @@ class BaseHandler:
             return None, "您尚未选择激活账号，请先使用 /三角洲 账号切换 命令选择账号"
         
         current_selection, _ = user_data
-        if current_selection < 1 or current_selection > len(accounts):
+        if not isinstance(current_selection, int) or current_selection < 1 or current_selection > len(accounts):
             return None, "当前选择的账号序号无效，请重新选择账号"
         
         current_account = accounts[current_selection - 1]

@@ -2,7 +2,7 @@
 账号管理处理器
 包含：登录、账号列表、绑定、解绑、切换等
 """
-import time
+import asyncio
 from astrbot.api.event import AstrMessageEvent
 import astrbot.api.message_components as Comp
 from .base import BaseHandler
@@ -10,6 +10,17 @@ from .base import BaseHandler
 
 class AccountHandler(BaseHandler):
     """账号管理处理器"""
+
+    @staticmethod
+    def _recalc_selection(current: int, removed: int, remaining: int) -> int:
+        """解绑/删除后重新计算激活账号序号"""
+        if remaining <= 0:
+            return 0
+        if removed == current:
+            return min(1, remaining)
+        if removed < current:
+            return current - 1
+        return current
 
     async def login_by_qq_ck(self, event: AstrMessageEvent, cookie: str = None):
         """QQ Cookie 登录"""
@@ -30,7 +41,7 @@ class AccountHandler(BaseHandler):
         
         frameworkToken = result_sig.get("frameworkToken", "")
         while True:
-            time.sleep(1)
+            await asyncio.sleep(1)
             result_sig = await self.api.login_qqck_get_status(frameworkToken)
             code = result_sig.get("code", -2)
             if code == -2:
@@ -75,7 +86,7 @@ class AccountHandler(BaseHandler):
         yield self.chain_reply(event, "获取二维码成功，请登录！", [Comp.Image.fromBase64(image_base64)])
         
         while True:
-            time.sleep(1)
+            await asyncio.sleep(1)
             result_sig = await self.api.login_qq_get_status(frameworkToken)
             code = result_sig.get("code", -3)
             if code == 1 or code == 2:
@@ -124,7 +135,7 @@ class AccountHandler(BaseHandler):
         yield self.chain_reply(event, "获取二维码成功，请登录！", [Comp.Image.fromURL(image)])
         
         while True:
-            time.sleep(1)
+            await asyncio.sleep(1)
             result_sig = await self.api.login_wechat_get_status(frameworkToken)
             code = result_sig.get("code", -3)
             if code == 1 or code == 2:
@@ -174,7 +185,7 @@ class AccountHandler(BaseHandler):
         yield self.chain_reply(event, "获取二维码成功，请登录！", [Comp.Image.fromBase64(image_base64)])
         
         while True:
-            time.sleep(1)
+            await asyncio.sleep(1)
             result_sig = await self.api.login_qqsafe_get_status(frameworkToken)
             code = result_sig.get("code", -2)
             if code == 1 or code == 2:
@@ -221,7 +232,7 @@ class AccountHandler(BaseHandler):
         yield self.chain_reply(event, "获取二维码成功，请登录！", [Comp.Image.fromBase64(image_base64)])
         
         while True:
-            time.sleep(1)
+            await asyncio.sleep(1)
             result_sig = await self.api.login_wegame_get_status(frameworkToken)
             code = result_sig.get("code", -2)
             if code == 1 or code == 2:
@@ -379,9 +390,15 @@ class AccountHandler(BaseHandler):
             yield self.chain_reply(event, "序号无效，请检查后重试")
             return
         
+        user_data = await self.db_manager.get_user(event.get_sender_id())
+        current_selection = user_data[0] if user_data else 0
+        
         frameworkToken = accounts[value - 1].get("frameworkToken", "")
         result_unbind = await self.api.user_unbind(platformId=event.get_sender_id(), frameworkToken=frameworkToken)
-        result_db_unbind = await self.db_manager.upsert_user(user=event.get_sender_id(), selection=value - 1, token=None)
+        
+        remaining = len(accounts) - 1
+        new_selection = self._recalc_selection(current_selection, value, remaining)
+        result_db_unbind = await self.db_manager.upsert_user(user=event.get_sender_id(), selection=new_selection)
         
         if not self.is_success(result_unbind) or not result_db_unbind:
             yield self.chain_reply(event, f"解绑账号失败，错误代码：{self.get_error_msg(result_unbind)}")
@@ -405,6 +422,9 @@ class AccountHandler(BaseHandler):
             yield self.chain_reply(event, "序号无效，请检查后重试")
             return
         
+        user_data = await self.db_manager.get_user(event.get_sender_id())
+        current_selection = user_data[0] if user_data else 0
+        
         account = accounts[value - 1]
         frameworkToken = account.get("frameworkToken", "")
         token_type = account.get("tokenType", "").lower()
@@ -417,7 +437,9 @@ class AccountHandler(BaseHandler):
             yield self.chain_reply(event, "仅支持删除QQ和微信登录数据，其他类型暂不支持！")
             return
         
-        result_db = await self.db_manager.upsert_user(user=event.get_sender_id(), selection=value - 1, token=None)
+        remaining = len(accounts) - 1
+        new_selection = self._recalc_selection(current_selection, value, remaining)
+        result_db = await self.db_manager.upsert_user(user=event.get_sender_id(), selection=new_selection)
         
         if not self.is_success(result_delete) or not result_db:
             yield self.chain_reply(event, f"删除账号失败，错误代码：{self.get_error_msg(result_delete)}")
@@ -470,7 +492,6 @@ class AccountHandler(BaseHandler):
                 # 更新数据库中的token
                 await self.db_manager.upsert_user(
                     user=event.get_sender_id(),
-                    selection=None,  # 保持当前选择
                     token=new_token
                 )
                 yield self.chain_reply(event, "✅ QQ登录刷新成功！")
@@ -500,7 +521,6 @@ class AccountHandler(BaseHandler):
                 # 更新数据库中的token
                 await self.db_manager.upsert_user(
                     user=event.get_sender_id(),
-                    selection=None,
                     token=new_token
                 )
                 yield self.chain_reply(event, "✅ 微信登录刷新成功！")
@@ -550,6 +570,9 @@ class AccountHandler(BaseHandler):
             
             # 绑定账号
             result_list = await self.api.user_acc_list(platformId=event.get_sender_id())
+            if not self.is_success(result_list):
+                yield self.chain_reply(event, f"获取账号列表失败：{self.get_error_msg(result_list)}")
+                return
             result_bind = await self.api.user_bind(platformId=event.get_sender_id(), frameworkToken=framework_token)
             result_db = await self.db_manager.upsert_user(
                 user=event.get_sender_id(),
@@ -568,7 +591,6 @@ class AccountHandler(BaseHandler):
     async def login_wechat_oauth(self, event: AstrMessageEvent, auth_url: str = None):
         """微信 OAuth 授权登录"""
         if not auth_url:
-            # 获取授权链接
             result = await self.api.login_wechat_oauth_get_url(
                 platform_id=event.get_sender_id()
             )
@@ -588,7 +610,6 @@ class AccountHandler(BaseHandler):
             yield self.chain_reply(event, help_text)
             return
         
-        # 提交授权链接
         try:
             result = await self.api.login_wechat_oauth_submit(auth_url)
             
@@ -601,8 +622,10 @@ class AccountHandler(BaseHandler):
                 yield self.chain_reply(event, "获取登录信息失败，请重试！")
                 return
             
-            # 绑定账号
             result_list = await self.api.user_acc_list(platformId=event.get_sender_id())
+            if not self.is_success(result_list):
+                yield self.chain_reply(event, f"获取账号列表失败：{self.get_error_msg(result_list)}")
+                return
             result_bind = await self.api.user_bind(platformId=event.get_sender_id(), frameworkToken=framework_token)
             result_db = await self.db_manager.upsert_user(
                 user=event.get_sender_id(),

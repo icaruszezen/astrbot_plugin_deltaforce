@@ -43,10 +43,15 @@ class DeltaForce(Star):
         self.token = config.get("token", "")
         self.clientid = config.get("clientid", "")
         
-        # API 配置
         self.api_mode = config.get("api_mode", "auto")
-        self.api_timeout = config.get("api_timeout", 30)
-        self.api_retry_count = config.get("api_retry_count", 3)
+        try:
+            self.api_timeout = max(1, int(config.get("api_timeout", 30)))
+        except (TypeError, ValueError):
+            self.api_timeout = 30
+        try:
+            self.api_retry_count = max(0, min(int(config.get("api_retry_count", 3)), 10))
+        except (TypeError, ValueError):
+            self.api_retry_count = 3
         
         try:
             # 初始化 API 和数据库
@@ -214,6 +219,9 @@ class DeltaForce(Star):
         if not value:
             yield event.plain_result("请输入要解绑的账号序号")
             return
+        if not value.strip().isdigit():
+            yield event.plain_result("请输入有效的账号序号（正整数）")
+            return
         async for result in self.account_handler.unbind_account(event, int(value)):
             yield result
 
@@ -223,6 +231,9 @@ class DeltaForce(Star):
         if not value:
             yield event.plain_result("请输入要删除的账号序号")
             return
+        if not value.strip().isdigit():
+            yield event.plain_result("请输入有效的账号序号（正整数）")
+            return
         async for result in self.account_handler.delete_account(event, int(value)):
             yield result
 
@@ -231,6 +242,9 @@ class DeltaForce(Star):
         """切换账号"""
         if not value:
             yield event.plain_result("请输入要切换的账号序号")
+            return
+        if not value.strip().isdigit():
+            yield event.plain_result("请输入有效的账号序号（正整数）")
             return
         async for result in self.account_handler.switch_account(event, int(value)):
             yield result
