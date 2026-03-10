@@ -184,37 +184,37 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲QQ登录", alias={"洲QQ登录", "三角洲登录", "洲登录"})
-    async def login_by_qq(self, event: AstrMessageEvent, *args, **kwargs):
+    async def login_by_qq(self, event: AstrMessageEvent, _extra: str = ""):
         """QQ 二维码登录"""
         async for result in self.account_handler.login_by_qq(event):
             yield result
 
     @filter.command("三角洲微信登录", alias={"洲微信登录"})
-    async def login_by_wechat(self, event: AstrMessageEvent, *args, **kwargs):
+    async def login_by_wechat(self, event: AstrMessageEvent, _extra: str = ""):
         """微信二维码登录"""
         async for result in self.account_handler.login_by_wechat(event):
             yield result
 
     @filter.command("三角洲安全中心登录", alias={"洲安全中心登录"})
-    async def login_by_qqsafe(self, event: AstrMessageEvent, *args, **kwargs):
+    async def login_by_qqsafe(self, event: AstrMessageEvent, _extra: str = ""):
         """QQ安全中心登录"""
         async for result in self.account_handler.login_by_qqsafe(event):
             yield result
 
     @filter.command("三角洲WeGame登录", alias={"洲WeGame登录", "三角洲WG登录", "洲WG登录"})
-    async def login_by_wegame(self, event: AstrMessageEvent, *args, **kwargs):
+    async def login_by_wegame(self, event: AstrMessageEvent, _extra: str = ""):
         """WeGame 登录"""
         async for result in self.account_handler.login_by_wegame(event):
             yield result
 
     @filter.command("三角洲WeGame领奖", alias={"洲WeGame领奖", "三角洲WG领奖", "洲WG领奖", "三角洲每日领奖", "三角洲wegame礼包"})
-    async def wegame_claim_gift(self, event: AstrMessageEvent, *args, **kwargs):
+    async def wegame_claim_gift(self, event: AstrMessageEvent, _extra: str = ""):
         """WeGame 每日领奖"""
         async for result in self.account_handler.wegame_claim_gift(event):
             yield result
 
     @filter.command("三角洲账号列表", alias={"洲账号列表", "三角洲账号管理", "洲账号管理"})
-    async def list_account(self, event: AstrMessageEvent, *args, **kwargs):
+    async def list_account(self, event: AstrMessageEvent, _extra: str = ""):
         """查看账号列表"""
         async for result in self.account_handler.list_account(event):
             yield result
@@ -256,13 +256,13 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲QQ刷新", alias={"洲QQ刷新", "三角洲刷新QQ"})
-    async def refresh_qq(self, event: AstrMessageEvent, *args, **kwargs):
+    async def refresh_qq(self, event: AstrMessageEvent, _extra: str = ""):
         """刷新QQ登录"""
         async for result in self.account_handler.refresh_qq(event):
             yield result
 
     @filter.command("三角洲微信刷新", alias={"洲微信刷新", "三角洲刷新微信"})
-    async def refresh_wechat(self, event: AstrMessageEvent, *args, **kwargs):
+    async def refresh_wechat(self, event: AstrMessageEvent, _extra: str = ""):
         """刷新微信登录"""
         async for result in self.account_handler.refresh_wechat(event):
             yield result
@@ -282,31 +282,31 @@ class DeltaForce(Star):
     # ==================== 信息查询命令 ====================
 
     @filter.command("三角洲货币", alias={"洲货币", "三角洲余额", "三角洲金币"})
-    async def get_money(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_money(self, event: AstrMessageEvent, _extra: str = ""):
         """查询货币信息"""
         async for result in self.info_handler.get_money(event):
             yield result
 
     @filter.command("三角洲信息", alias={"洲信息", "三角洲个人信息", "三角洲我的信息"})
-    async def get_personal_info(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_personal_info(self, event: AstrMessageEvent, _extra: str = ""):
         """查询个人信息"""
         async for result in self.info_handler.get_personal_info(event):
             yield result
 
     @filter.command("三角洲UID", alias={"洲UID", "三角洲uid", "洲uid"})
-    async def get_uid(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_uid(self, event: AstrMessageEvent, _extra: str = ""):
         """查询UID"""
         async for result in self.info_handler.get_uid(event):
             yield result
 
     @filter.command("三角洲每日密码", alias={"洲每日密码", "三角洲今日密码", "洲今日密码"})
-    async def get_daily_keyword(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_daily_keyword(self, event: AstrMessageEvent, _extra: str = ""):
         """获取每日密码"""
         async for result in self.info_handler.get_daily_keyword(event):
             yield result
 
     @filter.command("三角洲违规历史", alias={"洲违规历史", "三角洲封禁历史"})
-    async def get_ban_history(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_ban_history(self, event: AstrMessageEvent, _extra: str = ""):
         """查询违规历史"""
         async for result in self.info_handler.get_ban_history(event):
             yield result
@@ -318,7 +318,7 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲特勤处状态", alias={"洲特勤处状态", "三角洲特勤状态"})
-    async def get_place_status(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_place_status(self, event: AstrMessageEvent, _extra: str = ""):
         """查询特勤处状态"""
         async for result in self.info_handler.get_place_status(event):
             yield result
@@ -330,19 +330,19 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲出红记录", alias={"洲出红记录", "三角洲红色记录", "三角洲红装记录"})
-    async def get_red_collection(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_red_collection(self, event: AstrMessageEvent, _extra: str = ""):
         """查询出红记录"""
         async for result in self.info_handler.get_red_collection(event):
             yield result
 
     @filter.command("三角洲健康状态", alias={"洲健康状态", "三角洲游戏健康"})
-    async def get_game_health(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_game_health(self, event: AstrMessageEvent, _extra: str = ""):
         """查询游戏健康状态"""
         async for result in self.info_handler.get_game_health(event):
             yield result
 
     @filter.command("三角洲用户统计", alias={"洲用户统计", "三角洲统计"})
-    async def get_user_stats(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_user_stats(self, event: AstrMessageEvent, _extra: str = ""):
         """查询用户统计"""
         async for result in self.info_handler.get_user_stats(event):
             yield result
@@ -368,7 +368,7 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲藏品", alias={"洲藏品", "三角洲collection", "三角洲收藏"})
-    async def get_collection(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_collection(self, event: AstrMessageEvent, _extra: str = ""):
         """查询藏品信息"""
         async for result in self.data_handler.get_collection(event):
             yield result
@@ -436,7 +436,7 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲文章列表", alias={"洲文章列表", "三角洲文章"})
-    async def get_article_list(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_article_list(self, event: AstrMessageEvent, _extra: str = ""):
         """获取文章列表"""
         async for result in self.tools_handler.get_article_list(event):
             yield result
@@ -448,7 +448,7 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲官方改枪码", alias={"洲官方改枪码", "三角洲官方方案", "三角洲官方改枪码列表"})
-    async def get_official_solution_list(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_official_solution_list(self, event: AstrMessageEvent, _extra: str = ""):
         """获取官方改枪方案列表"""
         async for result in self.tools_handler.get_official_solution_list(event):
             yield result
@@ -462,7 +462,7 @@ class DeltaForce(Star):
     # ==================== 系统命令 ====================
 
     @filter.command("三角洲服务器状态", alias={"洲服务器状态", "三角洲状态", "三角洲health"})
-    async def get_server_health(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_server_health(self, event: AstrMessageEvent, _extra: str = ""):
         """查询服务器状态"""
         async for result in self.system_handler.get_server_health(event):
             yield result
@@ -471,14 +471,14 @@ class DeltaForce(Star):
 
     @filter.command("三角洲更新日志", alias={"洲更新日志", "三角洲changelog"})
     @filter.permission_type(filter.PermissionType.ADMIN)
-    async def get_changelog(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_changelog(self, event: AstrMessageEvent, _extra: str = ""):
         """查看更新日志（管理员）"""
         async for result in self.system_handler.get_changelog(event):
             yield result
 
     @filter.command("三角洲插件状态", alias={"洲插件状态", "三角洲插件信息"})
     @filter.permission_type(filter.PermissionType.ADMIN)
-    async def get_plugin_status(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_plugin_status(self, event: AstrMessageEvent, _extra: str = ""):
         """查看插件状态（管理员）"""
         async for result in self.system_handler.get_plugin_status(event):
             yield result
@@ -490,13 +490,13 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲取消订阅", alias={"洲取消订阅", "三角洲取消战绩订阅"})
-    async def unsubscribe_record(self, event: AstrMessageEvent, *args, **kwargs):
+    async def unsubscribe_record(self, event: AstrMessageEvent, _extra: str = ""):
         """取消战绩订阅"""
         async for result in self.system_handler.unsubscribe_record(event):
             yield result
 
     @filter.command("三角洲订阅状态", alias={"洲订阅状态", "三角洲查看订阅"})
-    async def get_subscription_status(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_subscription_status(self, event: AstrMessageEvent, _extra: str = ""):
         """查看订阅状态"""
         async for result in self.system_handler.get_subscription_status(event):
             yield result
@@ -504,13 +504,13 @@ class DeltaForce(Star):
     # ==================== 娱乐功能命令 ====================
 
     @filter.command("三角洲tts状态", alias={"洲tts状态", "三角洲TTS状态"})
-    async def get_tts_health(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_tts_health(self, event: AstrMessageEvent, _extra: str = ""):
         """查询TTS服务状态"""
         async for result in self.entertainment_handler.get_tts_health(event):
             yield result
 
     @filter.command("三角洲tts角色列表", alias={"洲tts角色列表", "三角洲TTS角色列表"})
-    async def get_tts_presets(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_tts_presets(self, event: AstrMessageEvent, _extra: str = ""):
         """获取TTS角色预设列表"""
         async for result in self.entertainment_handler.get_tts_presets(event):
             yield result
@@ -528,13 +528,13 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲tts上传", alias={"洲tts上传", "三角洲TTS上传", "三角洲tts下载"})
-    async def download_last_tts(self, event: AstrMessageEvent, *args, **kwargs):
+    async def download_last_tts(self, event: AstrMessageEvent, _extra: str = ""):
         """下载上次合成的TTS语音"""
         async for result in self.entertainment_handler.download_last_tts(event):
             yield result
 
     @filter.command("三角洲ai预设列表", alias={"洲ai预设列表", "三角洲AI预设列表"})
-    async def get_ai_presets(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_ai_presets(self, event: AstrMessageEvent, _extra: str = ""):
         """获取AI预设列表"""
         async for result in self.entertainment_handler.get_ai_presets(event):
             yield result
@@ -584,13 +584,13 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲语音分类", alias={"洲语音分类", "三角洲语音分类列表"})
-    async def get_voice_categories(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_voice_categories(self, event: AstrMessageEvent, _extra: str = ""):
         """获取语音分类列表"""
         async for result in self.voice_handler.get_voice_categories(event):
             yield result
 
     @filter.command("三角洲语音统计", alias={"洲语音统计", "三角洲语音数据"})
-    async def get_voice_stats(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_voice_stats(self, event: AstrMessageEvent, _extra: str = ""):
         """获取语音统计数据"""
         async for result in self.voice_handler.get_voice_stats(event):
             yield result
@@ -622,13 +622,13 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲歌词", alias={"洲歌词", "三角洲鼠鼠歌词"})
-    async def get_lyrics(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_lyrics(self, event: AstrMessageEvent, _extra: str = ""):
         """获取歌词"""
         async for result in self.music_handler.get_lyrics(event):
             yield result
 
     @filter.command("三角洲鼠鼠语音", alias={"洲鼠鼠语音"})
-    async def send_shushu_voice(self, event: AstrMessageEvent, *args, **kwargs):
+    async def send_shushu_voice(self, event: AstrMessageEvent, _extra: str = ""):
         """发送鼠鼠语音"""
         async for result in self.music_handler.send_voice(event):
             yield result
@@ -666,13 +666,13 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲房间标签", alias={"洲房间标签", "三角洲开黑标签"})
-    async def get_room_tags(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_room_tags(self, event: AstrMessageEvent, _extra: str = ""):
         """获取房间标签列表"""
         async for result in self.room_handler.get_room_tags(event):
             yield result
 
     @filter.command("三角洲房间地图列表", alias={"洲房间地图列表", "三角洲房间地图"})
-    async def get_room_maps(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_room_maps(self, event: AstrMessageEvent, _extra: str = ""):
         """获取房间地图列表"""
         async for result in self.room_handler.get_room_maps(event):
             yield result
@@ -780,7 +780,7 @@ class DeltaForce(Star):
     # ==================== 推送命令 ====================
 
     @filter.command("三角洲开启每日密码推送", alias={"洲开启每日密码推送", "三角洲开启密码推送"})
-    async def enable_daily_keyword_push(self, event: AstrMessageEvent, *args, **kwargs):
+    async def enable_daily_keyword_push(self, event: AstrMessageEvent, _extra: str = ""):
         """开启每日密码推送"""
         if not self.push_handler:
             yield event.plain_result("推送功能未初始化")
@@ -789,7 +789,7 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲关闭每日密码推送", alias={"洲关闭每日密码推送", "三角洲关闭密码推送"})
-    async def disable_daily_keyword_push(self, event: AstrMessageEvent, *args, **kwargs):
+    async def disable_daily_keyword_push(self, event: AstrMessageEvent, _extra: str = ""):
         """关闭每日密码推送"""
         if not self.push_handler:
             yield event.plain_result("推送功能未初始化")
@@ -798,7 +798,7 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲开启日报推送", alias={"洲开启日报推送", "三角洲订阅日报"})
-    async def enable_daily_report_push(self, event: AstrMessageEvent, *args, **kwargs):
+    async def enable_daily_report_push(self, event: AstrMessageEvent, _extra: str = ""):
         """开启日报推送"""
         if not self.push_handler:
             yield event.plain_result("推送功能未初始化")
@@ -807,7 +807,7 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲关闭日报推送", alias={"洲关闭日报推送", "三角洲取消订阅日报"})
-    async def disable_daily_report_push(self, event: AstrMessageEvent, *args, **kwargs):
+    async def disable_daily_report_push(self, event: AstrMessageEvent, _extra: str = ""):
         """关闭日报推送"""
         if not self.push_handler:
             yield event.plain_result("推送功能未初始化")
@@ -816,7 +816,7 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲开启周报推送", alias={"洲开启周报推送", "三角洲订阅周报"})
-    async def enable_weekly_report_push(self, event: AstrMessageEvent, *args, **kwargs):
+    async def enable_weekly_report_push(self, event: AstrMessageEvent, _extra: str = ""):
         """开启周报推送"""
         if not self.push_handler:
             yield event.plain_result("推送功能未初始化")
@@ -825,7 +825,7 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲关闭周报推送", alias={"洲关闭周报推送", "三角洲取消订阅周报"})
-    async def disable_weekly_report_push(self, event: AstrMessageEvent, *args, **kwargs):
+    async def disable_weekly_report_push(self, event: AstrMessageEvent, _extra: str = ""):
         """关闭周报推送"""
         if not self.push_handler:
             yield event.plain_result("推送功能未初始化")
@@ -834,7 +834,7 @@ class DeltaForce(Star):
             yield result
 
     @filter.command("三角洲推送状态", alias={"洲推送状态", "三角洲定时任务状态"})
-    async def get_push_status(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_push_status(self, event: AstrMessageEvent, _extra: str = ""):
         """查询推送状态"""
         if not self.push_handler:
             yield event.plain_result("推送功能未初始化")
@@ -845,7 +845,7 @@ class DeltaForce(Star):
     # ==================== 特勤处推送命令 ====================
 
     @filter.command("三角洲开启特勤处推送", alias={"洲开启特勤处推送", "三角洲订阅特勤处"})
-    async def enable_place_task_push(self, event: AstrMessageEvent, *args, **kwargs):
+    async def enable_place_task_push(self, event: AstrMessageEvent, _extra: str = ""):
         """开启特勤处制造完成推送"""
         if not self.place_task_push:
             yield event.plain_result("推送功能未初始化")
@@ -879,7 +879,7 @@ class DeltaForce(Star):
         yield event.plain_result(message)
 
     @filter.command("三角洲关闭特勤处推送", alias={"洲关闭特勤处推送", "三角洲取消订阅特勤处"})
-    async def disable_place_task_push(self, event: AstrMessageEvent, *args, **kwargs):
+    async def disable_place_task_push(self, event: AstrMessageEvent, _extra: str = ""):
         """关闭特勤处制造完成推送"""
         if not self.place_task_push:
             yield event.plain_result("推送功能未初始化")
@@ -919,7 +919,7 @@ class DeltaForce(Star):
         yield event.plain_result(result.get("message", "广播发送失败"))
 
     @filter.command("三角洲广播历史", alias={"洲广播历史", "三角洲通知历史"})
-    async def get_broadcast_history(self, event: AstrMessageEvent, *args, **kwargs):
+    async def get_broadcast_history(self, event: AstrMessageEvent, _extra: str = ""):
         """查看广播历史（仅管理员）"""
         if not self.broadcast_system:
             yield event.plain_result("广播功能未初始化")
