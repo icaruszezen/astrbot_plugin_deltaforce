@@ -234,7 +234,7 @@ class DeltaForceAPI:
     
     async def _handle_response(self, response: aiohttp.ClientResponse) -> Dict:
         """处理响应"""
-        if response.status != 200:
+        if response.status >= 300:
             text = await response.text()
             if "<html" in text.lower() or "<!doctype" in text.lower():
                 error_msg = f"服务器错误 ({response.status})"
