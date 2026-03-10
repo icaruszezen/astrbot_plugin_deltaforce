@@ -328,7 +328,7 @@ class SystemHandler(BaseHandler):
         changelog = """📝【三角洲插件更新日志】
 ━━━━━━━━━━━━━━━━━━━━
 
-📦 v0.3.0 (当前版本)
+📦 v0.3.1 (当前版本)
 • 新增物品列表查询功能
 • 新增大红收藏按赛季查询
 • 新增最高利润V2排行功能
@@ -365,7 +365,7 @@ class SystemHandler(BaseHandler):
             "⚙️【插件运行状态】",
             "━━━━━━━━━━━━━━━━━━━━",
             "",
-            f"📦 插件版本: v0.3.0",
+            f"📦 插件版本: v0.3.1",
             f"🐍 Python版本: {sys.version.split()[0]}",
             f"💻 系统平台: {platform.system()} {platform.release()}",
             "",
