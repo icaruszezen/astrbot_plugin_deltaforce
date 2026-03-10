@@ -28,6 +28,280 @@ except ImportError:
     logger.warning("推送模块未能加载，定时推送功能不可用")
 
 
+# 子命令路由表: 当用户发送 "三角洲 xxx" (带空格) 时, 通过此表路由到对应的 handler 方法
+# 格式: "子命令关键词": ("handler属性名", "方法名", 是否传递参数)
+_CMD_ROUTES = {
+    # 帮助
+    "帮助": ("system_handler", "show_help", False),
+    "菜单": ("system_handler", "show_help", False),
+    # 账号 - 登录
+    "CK登录": ("account_handler", "login_by_qq_ck", True),
+    "Cookie登录": ("account_handler", "login_by_qq_ck", True),
+    "ck登录": ("account_handler", "login_by_qq_ck", True),
+    "QQ登录": ("account_handler", "login_by_qq", False),
+    "登录": ("account_handler", "login_by_qq", False),
+    "微信登录": ("account_handler", "login_by_wechat", False),
+    "安全中心登录": ("account_handler", "login_by_qqsafe", False),
+    "WeGame登录": ("account_handler", "login_by_wegame", False),
+    "WG登录": ("account_handler", "login_by_wegame", False),
+    "WeGame领奖": ("account_handler", "wegame_claim_gift", False),
+    "WG领奖": ("account_handler", "wegame_claim_gift", False),
+    "每日领奖": ("account_handler", "wegame_claim_gift", False),
+    "wegame礼包": ("account_handler", "wegame_claim_gift", False),
+    "账号列表": ("account_handler", "list_account", False),
+    "账号管理": ("account_handler", "list_account", False),
+    "QQ刷新": ("account_handler", "refresh_qq", False),
+    "刷新QQ": ("account_handler", "refresh_qq", False),
+    "微信刷新": ("account_handler", "refresh_wechat", False),
+    "刷新微信": ("account_handler", "refresh_wechat", False),
+    "QQ授权登录": ("account_handler", "login_qq_oauth", True),
+    "qqoauth": ("account_handler", "login_qq_oauth", True),
+    "微信授权登录": ("account_handler", "login_wechat_oauth", True),
+    "wechatoauth": ("account_handler", "login_wechat_oauth", True),
+    # 信息查询
+    "货币": ("info_handler", "get_money", False),
+    "余额": ("info_handler", "get_money", False),
+    "金币": ("info_handler", "get_money", False),
+    "信息": ("info_handler", "get_personal_info", False),
+    "个人信息": ("info_handler", "get_personal_info", False),
+    "我的信息": ("info_handler", "get_personal_info", False),
+    "UID": ("info_handler", "get_uid", False),
+    "uid": ("info_handler", "get_uid", False),
+    "每日密码": ("info_handler", "get_daily_keyword", False),
+    "今日密码": ("info_handler", "get_daily_keyword", False),
+    "违规历史": ("info_handler", "get_ban_history", False),
+    "封禁历史": ("info_handler", "get_ban_history", False),
+    "干员列表": ("info_handler", "get_operator_list", True),
+    "所有干员": ("info_handler", "get_operator_list", True),
+    "特勤处状态": ("info_handler", "get_place_status", False),
+    "特勤状态": ("info_handler", "get_place_status", False),
+    "特勤处信息": ("info_handler", "get_place_info", True),
+    "特勤信息": ("info_handler", "get_place_info", True),
+    "出红记录": ("info_handler", "get_red_collection", False),
+    "红色记录": ("info_handler", "get_red_collection", False),
+    "红装记录": ("info_handler", "get_red_collection", False),
+    "健康状态": ("info_handler", "get_game_health", False),
+    "游戏健康": ("info_handler", "get_game_health", False),
+    "用户统计": ("info_handler", "get_user_stats", False),
+    "统计": ("info_handler", "get_user_stats", False),
+    # 数据查询
+    "数据": ("data_handler", "get_personal_data", True),
+    "data": ("data_handler", "get_personal_data", True),
+    "个人数据": ("data_handler", "get_personal_data", True),
+    "流水": ("data_handler", "get_flows", True),
+    "flows": ("data_handler", "get_flows", True),
+    "战绩": ("data_handler", "get_record", True),
+    "record": ("data_handler", "get_record", True),
+    "记录": ("data_handler", "get_record", True),
+    "藏品": ("data_handler", "get_collection", False),
+    "collection": ("data_handler", "get_collection", False),
+    "收藏": ("data_handler", "get_collection", False),
+    "干员": ("data_handler", "get_operators", True),
+    "operator": ("data_handler", "get_operators", True),
+    # 工具查询
+    "搜索": ("tools_handler", "search_object", True),
+    "search": ("tools_handler", "search_object", True),
+    "查找": ("tools_handler", "search_object", True),
+    "价格": ("tools_handler", "get_current_price", True),
+    "price": ("tools_handler", "get_current_price", True),
+    "物价": ("tools_handler", "get_current_price", True),
+    "材料价格": ("tools_handler", "get_material_price", True),
+    "材料": ("tools_handler", "get_material_price", True),
+    "material": ("tools_handler", "get_material_price", True),
+    "利润排行": ("tools_handler", "get_profit_rank", True),
+    "利润榜": ("tools_handler", "get_profit_rank", True),
+    "profit": ("tools_handler", "get_profit_rank", True),
+    "地图统计": ("tools_handler", "get_map_stats", True),
+    "mapstats": ("tools_handler", "get_map_stats", True),
+    "地图数据": ("tools_handler", "get_map_stats", True),
+    "物品列表": ("tools_handler", "get_object_list", True),
+    "itemlist": ("tools_handler", "get_object_list", True),
+    "物品": ("tools_handler", "get_object_list", True),
+    "大红收藏": ("tools_handler", "get_red_collection", True),
+    "大红藏品": ("tools_handler", "get_red_collection", True),
+    "红色收藏": ("tools_handler", "get_red_collection", True),
+    "最高利润": ("tools_handler", "get_max_profit", True),
+    "利润V2": ("tools_handler", "get_max_profit", True),
+    "maxprofit": ("tools_handler", "get_max_profit", True),
+    "特勤处利润": ("tools_handler", "get_special_ops_profit", True),
+    "特勤利润": ("tools_handler", "get_special_ops_profit", True),
+    "文章列表": ("tools_handler", "get_article_list", False),
+    "文章": ("tools_handler", "get_article_list", False),
+    "文章详情": ("tools_handler", "get_article_detail", True),
+    "文章内容": ("tools_handler", "get_article_detail", True),
+    "官方改枪码": ("tools_handler", "get_official_solution_list", False),
+    "官方方案": ("tools_handler", "get_official_solution_list", False),
+    "官方改枪码列表": ("tools_handler", "get_official_solution_list", False),
+    "官方改枪码详情": ("tools_handler", "get_official_solution_detail", True),
+    "官方方案详情": ("tools_handler", "get_official_solution_detail", True),
+    "价格历史": ("tools_handler", "get_price_history", True),
+    "历史价格": ("tools_handler", "get_price_history", True),
+    "利润历史": ("tools_handler", "get_profit_history", True),
+    "历史利润": ("tools_handler", "get_profit_history", True),
+    # 系统
+    "服务器状态": ("system_handler", "get_server_health", False),
+    "状态": ("system_handler", "get_server_health", False),
+    "health": ("system_handler", "get_server_health", False),
+    "更新日志": ("system_handler", "get_changelog", False),
+    "changelog": ("system_handler", "get_changelog", False),
+    "插件状态": ("system_handler", "get_plugin_status", False),
+    "插件信息": ("system_handler", "get_plugin_status", False),
+    "订阅战绩": ("system_handler", "subscribe_record", True),
+    "战绩订阅": ("system_handler", "subscribe_record", True),
+    "取消订阅": ("system_handler", "unsubscribe_record", False),
+    "取消战绩订阅": ("system_handler", "unsubscribe_record", False),
+    "订阅状态": ("system_handler", "get_subscription_status", False),
+    "查看订阅": ("system_handler", "get_subscription_status", False),
+    # 娱乐 - TTS
+    "tts状态": ("entertainment_handler", "get_tts_health", False),
+    "TTS状态": ("entertainment_handler", "get_tts_health", False),
+    "tts角色列表": ("entertainment_handler", "get_tts_presets", False),
+    "TTS角色列表": ("entertainment_handler", "get_tts_presets", False),
+    "tts角色详情": ("entertainment_handler", "get_tts_preset_detail", True),
+    "TTS角色详情": ("entertainment_handler", "get_tts_preset_detail", True),
+    "tts": ("entertainment_handler", "tts_synthesize", True),
+    "TTS": ("entertainment_handler", "tts_synthesize", True),
+    "语音合成": ("entertainment_handler", "tts_synthesize", True),
+    "tts上传": ("entertainment_handler", "download_last_tts", False),
+    "TTS上传": ("entertainment_handler", "download_last_tts", False),
+    "tts下载": ("entertainment_handler", "download_last_tts", False),
+    # 娱乐 - AI
+    "ai预设列表": ("entertainment_handler", "get_ai_presets", False),
+    "AI预设列表": ("entertainment_handler", "get_ai_presets", False),
+    "ai锐评": ("entertainment_handler", "get_ai_commentary", True),
+    "AI锐评": ("entertainment_handler", "get_ai_commentary", True),
+    "ai评价": ("entertainment_handler", "get_ai_commentary", True),
+    # 娱乐 - 报告
+    "日报": ("entertainment_handler", "get_daily_report", True),
+    "daily": ("entertainment_handler", "get_daily_report", True),
+    "每日报告": ("entertainment_handler", "get_daily_report", True),
+    "周报": ("entertainment_handler", "get_weekly_report", True),
+    "weekly": ("entertainment_handler", "get_weekly_report", True),
+    "每周报告": ("entertainment_handler", "get_weekly_report", True),
+    "昨日收益": ("entertainment_handler", "get_yesterday_profit", True),
+    "昨日物资": ("entertainment_handler", "get_yesterday_profit", True),
+    # 语音
+    "语音": ("voice_handler", "send_voice", True),
+    "游戏语音": ("voice_handler", "send_voice", True),
+    "语音角色": ("voice_handler", "get_voice_characters", True),
+    "语音角色列表": ("voice_handler", "get_voice_characters", True),
+    "语音标签": ("voice_handler", "get_voice_tags", True),
+    "语音标签列表": ("voice_handler", "get_voice_tags", True),
+    "语音分类": ("voice_handler", "get_voice_categories", False),
+    "语音分类列表": ("voice_handler", "get_voice_categories", False),
+    "语音统计": ("voice_handler", "get_voice_stats", False),
+    "语音数据": ("voice_handler", "get_voice_stats", False),
+    # 音乐
+    "鼠鼠音乐": ("music_handler", "send_music", True),
+    "播放音乐": ("music_handler", "send_music", True),
+    "音乐列表": ("music_handler", "get_music_list", True),
+    "鼠鼠音乐列表": ("music_handler", "get_music_list", True),
+    "鼠鼠歌单": ("music_handler", "get_playlist", True),
+    "歌单": ("music_handler", "get_playlist", True),
+    "点歌": ("music_handler", "select_music_by_number", True),
+    "听": ("music_handler", "select_music_by_number", True),
+    "播放": ("music_handler", "select_music_by_number", True),
+    "歌词": ("music_handler", "get_lyrics", False),
+    "鼠鼠歌词": ("music_handler", "get_lyrics", False),
+    "鼠鼠语音": ("music_handler", "send_voice", False),
+    # 房间
+    "房间列表": ("room_handler", "get_room_list", True),
+    "开黑列表": ("room_handler", "get_room_list", True),
+    "创建房间": ("room_handler", "create_room", True),
+    "开房间": ("room_handler", "create_room", True),
+    "加入房间": ("room_handler", "join_room", True),
+    "进入房间": ("room_handler", "join_room", True),
+    "退出房间": ("room_handler", "quit_room", True),
+    "离开房间": ("room_handler", "quit_room", True),
+    "房间信息": ("room_handler", "get_room_info", True),
+    "房间详情": ("room_handler", "get_room_info", True),
+    "房间标签": ("room_handler", "get_room_tags", False),
+    "开黑标签": ("room_handler", "get_room_tags", False),
+    "房间地图列表": ("room_handler", "get_room_maps", False),
+    "房间地图": ("room_handler", "get_room_maps", False),
+    "踢出成员": ("room_handler", "kick_member", True),
+    "踢人": ("room_handler", "kick_member", True),
+    # 改枪方案
+    "改枪码列表": ("solution_handler", "get_solution_list", True),
+    "改枪方案列表": ("solution_handler", "get_solution_list", True),
+    "改枪码详情": ("solution_handler", "get_solution_detail", True),
+    "改枪方案详情": ("solution_handler", "get_solution_detail", True),
+    "上传改枪码": ("solution_handler", "upload_solution", True),
+    "分享改枪码": ("solution_handler", "upload_solution", True),
+    "上传方案": ("solution_handler", "upload_solution", True),
+    "删除改枪码": ("solution_handler", "delete_solution", True),
+    "删除方案": ("solution_handler", "delete_solution", True),
+    "收藏改枪码": ("solution_handler", "collect_solution", True),
+    "收藏方案": ("solution_handler", "collect_solution", True),
+    "取消收藏改枪码": ("solution_handler", "discollect_solution", True),
+    "取消收藏方案": ("solution_handler", "discollect_solution", True),
+    "改枪码收藏列表": ("solution_handler", "get_collect_list", True),
+    "我的收藏方案": ("solution_handler", "get_collect_list", True),
+    # 计算器
+    "修甲": ("calculator_handler", "quick_repair", True),
+    "修理": ("calculator_handler", "quick_repair", True),
+    "维修计算": ("calculator_handler", "quick_repair", True),
+    "伤害": ("calculator_handler", "quick_damage", True),
+    "伤害计算": ("calculator_handler", "quick_damage", True),
+    "dmg": ("calculator_handler", "quick_damage", True),
+    "战场伤害": ("calculator_handler", "battlefield_damage", True),
+    "战场计算": ("calculator_handler", "battlefield_damage", True),
+    "mp伤害": ("calculator_handler", "battlefield_damage", True),
+    "战备": ("calculator_handler", "readiness", True),
+    "战备计算": ("calculator_handler", "readiness", True),
+    "配装计算": ("calculator_handler", "readiness", True),
+    "计算帮助": ("calculator_handler", "calc_help", True),
+    "计算器帮助": ("calculator_handler", "calc_help", True),
+    "计算映射表": ("calculator_handler", "mapping_table", True),
+    "映射表": ("calculator_handler", "mapping_table", True),
+}
+
+_DIGIT_VALIDATE_ROUTES = {
+    "解绑": ("account_handler", "unbind_account", "解绑"),
+    "账号解绑": ("account_handler", "unbind_account", "解绑"),
+    "删除": ("account_handler", "delete_account", "删除"),
+    "账号删除": ("account_handler", "delete_account", "删除"),
+    "切换": ("account_handler", "switch_account", "切换"),
+    "账号切换": ("account_handler", "switch_account", "切换"),
+}
+
+_VOTE_ROUTES = {
+    "改枪码点赞": True,
+    "方案点赞": True,
+    "改枪码点踩": False,
+    "方案点踩": False,
+}
+
+_PUSH_ROUTES = {
+    "开启每日密码推送": ("toggle_daily_keyword", True),
+    "开启密码推送": ("toggle_daily_keyword", True),
+    "关闭每日密码推送": ("toggle_daily_keyword", False),
+    "关闭密码推送": ("toggle_daily_keyword", False),
+    "开启日报推送": ("toggle_daily_report", True),
+    "订阅日报": ("toggle_daily_report", True),
+    "关闭日报推送": ("toggle_daily_report", False),
+    "取消订阅日报": ("toggle_daily_report", False),
+    "开启周报推送": ("toggle_weekly_report", True),
+    "订阅周报": ("toggle_weekly_report", True),
+    "关闭周报推送": ("toggle_weekly_report", False),
+    "取消订阅周报": ("toggle_weekly_report", False),
+    "推送状态": ("get_push_status", None),
+    "定时任务状态": ("get_push_status", None),
+}
+
+_PLACE_PUSH_ROUTES = {
+    "开启特勤处推送", "订阅特勤处",
+    "关闭特勤处推送", "取消订阅特勤处",
+}
+
+_BROADCAST_ROUTES = {
+    "广播": "send",
+    "系统通知": "send",
+    "广播历史": "history",
+    "通知历史": "history",
+}
+
+
 @register(
     "astrbot_plugin_deltaforce",
     "EntropyIncrease",
@@ -166,6 +440,138 @@ class DeltaForce(Star):
             
         except Exception as e:
             logger.error(f"推送模块初始化失败: {e}")
+
+    # ==================== 空格兼容分发器 ====================
+
+    @filter.command("三角洲", alias={"洲"})
+    async def delta_dispatch(self, event: AstrMessageEvent, rest: str = ""):
+        """处理 '三角洲 xxx' 格式的带空格指令，路由到对应的 handler"""
+        if not rest.strip():
+            async for result in self.system_handler.show_help(event):
+                yield result
+            return
+
+        parts = rest.strip().split(maxsplit=1)
+        sub_cmd = parts[0]
+        sub_args = parts[1] if len(parts) > 1 else ""
+
+        # 1) 需要数字验证的子命令 (解绑/删除/切换)
+        if sub_cmd in _DIGIT_VALIDATE_ROUTES:
+            handler_attr, method_name, action_name = _DIGIT_VALIDATE_ROUTES[sub_cmd]
+            if not sub_args:
+                yield event.plain_result(f"请输入要{action_name}的账号序号")
+                return
+            if not sub_args.strip().isdigit():
+                yield event.plain_result("请输入有效的账号序号（正整数）")
+                return
+            handler = getattr(self, handler_attr)
+            method = getattr(handler, method_name)
+            async for result in method(event, int(sub_args)):
+                yield result
+            return
+
+        # 2) 改枪方案投票
+        if sub_cmd in _VOTE_ROUTES:
+            is_upvote = _VOTE_ROUTES[sub_cmd]
+            async for result in self.solution_handler.vote_solution(event, sub_args, is_upvote):
+                yield result
+            return
+
+        # 3) 推送开关指令
+        if sub_cmd in _PUSH_ROUTES:
+            if not self.push_handler:
+                yield event.plain_result("推送功能未初始化")
+                return
+            method_name, toggle = _PUSH_ROUTES[sub_cmd]
+            method = getattr(self.push_handler, method_name)
+            if toggle is not None:
+                async for result in method(event, toggle):
+                    yield result
+            else:
+                async for result in method(event):
+                    yield result
+            return
+
+        # 4) 特勤处推送
+        if sub_cmd in _PLACE_PUSH_ROUTES:
+            if not self.place_task_push:
+                yield event.plain_result("推送功能未初始化")
+                return
+            user_id = str(event.get_sender_id())
+            if sub_cmd in ("开启特勤处推送", "订阅特勤处"):
+                user_data = await self.db_manager.get_user(int(user_id))
+                if not user_data or not user_data[1]:
+                    yield event.plain_result("请先登录账号后再开启特勤处推送")
+                    return
+                token = user_data[1]
+                umo = event.unified_msg_origin
+                umo_parts = umo.split(":") if umo else []
+                platform = umo_parts[0] if len(umo_parts) > 0 else "aiocqhttp"
+                target_type = umo_parts[1] if len(umo_parts) > 1 else "private"
+                target_id = umo_parts[2] if len(umo_parts) > 2 else user_id
+                success, message = await self.place_task_push.subscribe(
+                    user_id=user_id, token=token,
+                    target_type=target_type, target_id=target_id, platform=platform
+                )
+                yield event.plain_result(message)
+            else:
+                umo = event.unified_msg_origin
+                umo_parts = umo.split(":") if umo else []
+                target_type = umo_parts[1] if len(umo_parts) > 1 else "private"
+                target_id = umo_parts[2] if len(umo_parts) > 2 else user_id
+                success, message = await self.place_task_push.unsubscribe(
+                    user_id=user_id, target_type=target_type, target_id=target_id
+                )
+                yield event.plain_result(message)
+            return
+
+        # 5) 广播
+        if sub_cmd in _BROADCAST_ROUTES:
+            action = _BROADCAST_ROUTES[sub_cmd]
+            if not self.broadcast_system:
+                yield event.plain_result("广播功能未初始化")
+                return
+            if action == "send":
+                if not sub_args:
+                    yield event.plain_result("请输入广播内容\n用法: /三角洲广播 <消息内容>")
+                    return
+                sender_id = event.get_sender_id()
+                broadcast_result = await self.broadcast_system.broadcast(sender_id, sub_args)
+                yield event.plain_result(broadcast_result.get("message", "广播发送失败"))
+            else:
+                sender_id = event.get_sender_id()
+                if not self.broadcast_system.is_admin(sender_id):
+                    yield event.plain_result("您没有权限查看广播历史")
+                    return
+                history = await self.broadcast_system.get_history(10)
+                if not history:
+                    yield event.plain_result("暂无广播历史")
+                    return
+                import time
+                lines = ["最近广播记录\n"]
+                for i, record in enumerate(history, 1):
+                    timestamp = time.strftime("%Y-%m-%d %H:%M", time.localtime(record["created_at"]))
+                    msg_preview = record["message"][:30] + "..." if len(record["message"]) > 30 else record["message"]
+                    lines.append(f"{i}. [{timestamp}] {msg_preview}")
+                    lines.append(f"   成功: {record['success_count']} | 失败: {record['fail_count']}")
+                yield event.plain_result("\n".join(lines))
+            return
+
+        # 6) 通用路由表
+        route = _CMD_ROUTES.get(sub_cmd)
+        if route:
+            handler_attr, method_name, pass_args = route
+            handler = getattr(self, handler_attr)
+            method = getattr(handler, method_name)
+            if pass_args:
+                async for result in method(event, sub_args):
+                    yield result
+            else:
+                async for result in method(event):
+                    yield result
+            return
+
+        yield event.plain_result(f"未知指令: {sub_cmd}\n发送 '三角洲帮助' 查看可用指令")
 
     # ==================== 帮助命令 ====================
 
