@@ -169,7 +169,7 @@ class DeltaForceAPI:
                             async with session.get(full_url, headers=headers, params=params) as response:
                                 result = await self._handle_response(response)
                                 # 请求成功（业务成功）
-                                if result.get("code") == 200 or result.get("code") == 0:
+                                if result.get("code") == 200 or result.get("code") == 0 or result.get("success") is True:
                                     logger.debug(f"[ApiUrlManager] 请求成功: {base_url}")
                                     return result
                                 # 5xx服务器错误，应该重试和切换地址
@@ -187,7 +187,7 @@ class DeltaForceAPI:
                                                    json=json_data, data=form_data) as response:
                                 result = await self._handle_response(response)
                                 # 请求成功（业务成功）
-                                if result.get("code") == 200 or result.get("code") == 0:
+                                if result.get("code") == 200 or result.get("code") == 0 or result.get("success") is True:
                                     logger.debug(f"[ApiUrlManager] 请求成功: {base_url}")
                                     return result
                                 # 5xx服务器错误，应该重试和切换地址
@@ -243,7 +243,7 @@ class DeltaForceAPI:
             return {"code": response.status, "msg": error_msg, "data": None}
         
         try:
-            return await response.json()
+            return await response.json(content_type=None)
         except (aiohttp.ContentTypeError, json.JSONDecodeError):
             text = await response.text()
             if "<html" in text.lower() or "<!doctype" in text.lower():

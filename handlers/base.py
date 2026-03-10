@@ -34,7 +34,7 @@ class BaseHandler:
         code = response.get("code", -1)
         if isinstance(code, str):
             return code == "0" or code.upper() == "SUCCESS"
-        return code == 0
+        return code == 0 or code == 200
 
     def get_error_msg(self, response, default: str = "未知错误") -> str:
         """从响应中获取错误消息
