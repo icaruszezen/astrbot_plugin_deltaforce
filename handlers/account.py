@@ -265,6 +265,55 @@ class AccountHandler(BaseHandler):
         
         yield self.chain_reply(event, "登录绑定成功！")
 
+    async def wegame_claim_gift(self, event: AstrMessageEvent):
+        """WeGame 每日领奖"""
+        token, error = await self.get_active_token(event)
+        if error:
+            yield self.chain_reply(event, error)
+            return
+
+        yield self.chain_reply(event, "正在领取 WeGame 每日礼品...")
+
+        result = await self.api.wegame_claim_gift(framework_token=token)
+
+        if not self.is_success(result):
+            error_msg = self.get_error_msg(result)
+            if "已领取" in error_msg or "already" in error_msg.lower():
+                yield self.chain_reply(event, "今日已领取过 WeGame 礼品，请明天再来~")
+            elif "过期" in error_msg or "expired" in error_msg.lower() or "失效" in error_msg:
+                yield self.chain_reply(event, f"WeGame 登录已过期，请重新使用 /三角洲WeGame登录 进行登录\n错误: {error_msg}")
+            else:
+                yield self.chain_reply(event, f"领取失败：{error_msg}")
+            return
+
+        data = result.get("data", {})
+        msg = result.get("msg", "领取成功")
+
+        output_lines = ["🎁【WeGame 每日礼品】"]
+        output_lines.append("━━━━━━━━━━━━━━━")
+        output_lines.append(f"✅ {msg}")
+
+        items = data.get("items", data.get("rewards", []))
+        if items:
+            output_lines.append("")
+            output_lines.append("📦 获得奖励:")
+            for item in items:
+                name = item.get("name", "未知物品")
+                count = item.get("count", item.get("num", 1))
+                output_lines.append(f"  • {name} x{count}")
+
+        gift_name = data.get("gift", data.get("giftName", ""))
+        if gift_name and not items:
+            output_lines.append(f"\n📦 礼包: {gift_name}")
+
+        if not items and not gift_name:
+            if isinstance(data, dict) and data:
+                for key, value in data.items():
+                    if key not in ("claimed",):
+                        output_lines.append(f"  {key}: {value}")
+
+        yield self.chain_reply(event, "\n".join(output_lines))
+
     async def list_account(self, event: AstrMessageEvent):
         """账号列表"""
         result_list = await self.api.user_acc_list(platformId=event.get_sender_id())

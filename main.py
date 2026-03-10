@@ -207,6 +207,12 @@ class DeltaForce(Star):
         async for result in self.account_handler.login_by_wegame(event):
             yield result
 
+    @filter.command("三角洲WeGame领奖", alias={"洲WeGame领奖", "三角洲WG领奖", "洲WG领奖", "三角洲每日领奖", "三角洲wegame礼包"})
+    async def wegame_claim_gift(self, event: AstrMessageEvent):
+        """WeGame 每日领奖"""
+        async for result in self.account_handler.wegame_claim_gift(event):
+            yield result
+
     @filter.command("三角洲账号列表", alias={"洲账号列表", "三角洲账号管理", "洲账号管理"})
     async def list_account(self, event: AstrMessageEvent):
         """查看账号列表"""
@@ -439,6 +445,18 @@ class DeltaForce(Star):
     async def get_article_detail(self, event: AstrMessageEvent, thread_id: str = ""):
         """获取文章详情"""
         async for result in self.tools_handler.get_article_detail(event, thread_id):
+            yield result
+
+    @filter.command("三角洲官方改枪码", alias={"洲官方改枪码", "三角洲官方方案", "三角洲官方改枪码列表"})
+    async def get_official_solution_list(self, event: AstrMessageEvent):
+        """获取官方改枪方案列表"""
+        async for result in self.tools_handler.get_official_solution_list(event):
+            yield result
+
+    @filter.command("三角洲官方改枪码详情", alias={"洲官方改枪码详情", "三角洲官方方案详情"})
+    async def get_official_solution_detail(self, event: AstrMessageEvent, solution_id: str = ""):
+        """获取官方改枪方案详情"""
+        async for result in self.tools_handler.get_official_solution_detail(event, solution_id):
             yield result
 
     # ==================== 系统命令 ====================

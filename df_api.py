@@ -367,6 +367,13 @@ class DeltaForceAPI:
                 "frameworkToken": frameworkToken
             }
         )
+
+    async def wegame_claim_gift(self, framework_token: str):
+        """WeGame 每日领奖"""
+        return await self.req_get(
+            url="/df/wegame/wechat/gift",
+            params={"frameworkToken": framework_token}
+        )
     ################################################################
 
     async def get_daily_keyword(self):
@@ -781,6 +788,19 @@ class DeltaForceAPI:
         if place:
             params["place"] = place
         return await self.req_get(url="/df/place/profitRank/v2", params=params)
+
+    # ==================== 官方改枪方案 V1 API ====================
+
+    async def get_official_solution_list(self):
+        """获取官方改枪方案列表（V1）"""
+        return await self.req_get(url="/df/tools/solution/list")
+
+    async def get_official_solution_detail(self, solution_id: str):
+        """获取官方改枪方案详情（V1）"""
+        return await self.req_get(
+            url="/df/tools/solution/detail",
+            params={"id": solution_id}
+        )
 
     # ==================== 改枪方案 API ====================
 
