@@ -267,9 +267,23 @@ class AccountHandler(BaseHandler):
 
     async def wegame_claim_gift(self, event: AstrMessageEvent):
         """WeGame 每日领奖"""
-        token, error = await self.get_active_token(event)
-        if error:
-            yield self.chain_reply(event, error)
+        result_list = await self.api.user_acc_list(platformId=event.get_sender_id())
+        if not self.is_success(result_list):
+            yield self.chain_reply(event, f"获取账号列表失败：{self.get_error_msg(result_list)}")
+            return
+
+        accounts = result_list.get("data", [])
+        wegame_account = next(
+            (a for a in accounts if a.get("tokenType", "").lower() == "wegame" and a.get("isValid", False)),
+            None
+        )
+        if not wegame_account:
+            yield self.chain_reply(event, "未找到有效的 WeGame 账号，请先使用 /三角洲WeGame登录 绑定 WeGame 账号")
+            return
+
+        token = wegame_account.get("frameworkToken")
+        if not token:
+            yield self.chain_reply(event, "WeGame 账号 token 无效，请重新使用 /三角洲WeGame登录 进行登录")
             return
 
         yield self.chain_reply(event, "正在领取 WeGame 每日礼品...")
