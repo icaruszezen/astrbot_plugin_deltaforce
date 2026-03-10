@@ -446,6 +446,18 @@ class DeltaForce(Star):
     @filter.command("三角洲", alias={"洲"})
     async def delta_dispatch(self, event: AstrMessageEvent, rest: str = ""):
         """处理 '三角洲 xxx' 格式的带空格指令，路由到对应的 handler"""
+        # AstrBot 按空格分割参数，rest 只收到第一个词，后续参数丢失
+        # 从 event.message_str 提取完整剩余文本
+        try:
+            full_msg = event.message_str.strip()
+            for prefix in ["三角洲", "洲"]:
+                idx = full_msg.find(prefix)
+                if idx >= 0:
+                    rest = full_msg[idx + len(prefix):].strip()
+                    break
+        except Exception:
+            pass
+
         if not rest.strip():
             async for result in self.system_handler.show_help(event):
                 yield result
