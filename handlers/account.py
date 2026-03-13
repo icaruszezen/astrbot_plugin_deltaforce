@@ -22,6 +22,41 @@ class AccountHandler(BaseHandler):
             return current - 1
         return current
 
+    async def _resolve_bound_selection(self, user_id: str, framework_token: str) -> int:
+        """根据 frameworkToken 回查绑定后账号的真实序号"""
+        result_list = await self.api.user_acc_list(platformId=user_id)
+        if not self.is_success(result_list):
+            return 0
+
+        accounts = self.normalize_accounts_order(result_list.get("data", []))
+        for idx, account in enumerate(accounts, start=1):
+            if account.get("frameworkToken") == framework_token:
+                return idx
+        return 0
+
+    async def _bind_and_activate_account(self, event: AstrMessageEvent, framework_token: str):
+        """绑定账号并将新登录账号设为当前激活账号"""
+        result_bind = await self.api.user_bind(
+            platformId=event.get_sender_id(),
+            frameworkToken=framework_token
+        )
+        if not self.is_success(result_bind):
+            return False, f"绑定账号失败，错误代码：{self.get_error_msg(result_bind)}"
+
+        selection = await self._resolve_bound_selection(event.get_sender_id(), framework_token)
+        if selection <= 0:
+            return False, "登录绑定成功，但未能自动激活新账号，请使用 /三角洲 账号 命令查看后手动切换"
+
+        result_db_bind = await self.db_manager.upsert_user(
+            user=event.get_sender_id(),
+            selection=selection,
+            token=framework_token
+        )
+        if not result_db_bind:
+            return False, "登录绑定成功，但保存当前激活账号失败，请稍后重试"
+
+        return True, None
+
     async def login_by_qq_ck(self, event: AstrMessageEvent, cookie: str = None):
         """QQ Cookie 登录"""
         if not cookie:
@@ -54,20 +89,9 @@ class AccountHandler(BaseHandler):
                     return
                 break
         
-        result_list = await self.api.user_acc_list(platformId=event.get_sender_id())
-        if not self.is_success(result_list):
-            yield self.chain_reply(event, f"获取账号列表失败，错误代码：{self.get_error_msg(result_list)}")
-            return
-        
-        result_bind = await self.api.user_bind(platformId=event.get_sender_id(), frameworkToken=frameworkToken)
-        result_db_bind = await self.db_manager.upsert_user(
-            user=event.get_sender_id(), 
-            selection=len(result_list.get("data", [])) + 1, 
-            token=frameworkToken
-        )
-        
-        if not self.is_success(result_bind) or not result_db_bind:
-            yield self.chain_reply(event, f"绑定账号失败，错误代码：{self.get_error_msg(result_bind)}")
+        bind_success, bind_error = await self._bind_and_activate_account(event, frameworkToken)
+        if not bind_success:
+            yield self.chain_reply(event, bind_error)
             return
         
         yield self.chain_reply(event, "登录绑定成功！")
@@ -104,20 +128,9 @@ class AccountHandler(BaseHandler):
                     return
                 break
         
-        result_list = await self.api.user_acc_list(platformId=event.get_sender_id())
-        if not self.is_success(result_list):
-            yield self.chain_reply(event, f"获取账号列表失败，错误代码：{self.get_error_msg(result_list)}")
-            return
-        
-        result_bind = await self.api.user_bind(platformId=event.get_sender_id(), frameworkToken=frameworkToken)
-        result_db_bind = await self.db_manager.upsert_user(
-            user=event.get_sender_id(), 
-            selection=len(result_list.get("data", [])) + 1, 
-            token=frameworkToken
-        )
-        
-        if not self.is_success(result_bind) or not result_db_bind:
-            yield self.chain_reply(event, f"绑定账号失败，错误代码：{self.get_error_msg(result_bind)}")
+        bind_success, bind_error = await self._bind_and_activate_account(event, frameworkToken)
+        if not bind_success:
+            yield self.chain_reply(event, bind_error)
             return
         
         yield self.chain_reply(event, "登录绑定成功！")
@@ -153,20 +166,9 @@ class AccountHandler(BaseHandler):
                     return
                 break
         
-        result_list = await self.api.user_acc_list(platformId=event.get_sender_id())
-        if not self.is_success(result_list):
-            yield self.chain_reply(event, f"获取账号列表失败，错误代码：{self.get_error_msg(result_list)}")
-            return
-        
-        result_bind = await self.api.user_bind(platformId=event.get_sender_id(), frameworkToken=frameworkToken)
-        result_db_bind = await self.db_manager.upsert_user(
-            user=event.get_sender_id(), 
-            selection=len(result_list.get("data", [])) + 1, 
-            token=frameworkToken
-        )
-        
-        if not self.is_success(result_bind) or not result_db_bind:
-            yield self.chain_reply(event, f"绑定账号失败，错误代码：{self.get_error_msg(result_bind)}")
+        bind_success, bind_error = await self._bind_and_activate_account(event, frameworkToken)
+        if not bind_success:
+            yield self.chain_reply(event, bind_error)
             return
         
         yield self.chain_reply(event, "登录绑定成功！")
@@ -200,20 +202,9 @@ class AccountHandler(BaseHandler):
                     return
                 break
         
-        result_list = await self.api.user_acc_list(platformId=event.get_sender_id())
-        if not self.is_success(result_list):
-            yield self.chain_reply(event, f"获取账号列表失败，错误代码：{self.get_error_msg(result_list)}")
-            return
-        
-        result_bind = await self.api.user_bind(platformId=event.get_sender_id(), frameworkToken=frameworkToken)
-        result_db_bind = await self.db_manager.upsert_user(
-            user=event.get_sender_id(), 
-            selection=len(result_list.get("data", [])) + 1, 
-            token=frameworkToken
-        )
-        
-        if not self.is_success(result_bind) or not result_db_bind:
-            yield self.chain_reply(event, f"绑定账号失败，错误代码：{self.get_error_msg(result_bind)}")
+        bind_success, bind_error = await self._bind_and_activate_account(event, frameworkToken)
+        if not bind_success:
+            yield self.chain_reply(event, bind_error)
             return
         
         yield self.chain_reply(event, "登录绑定成功！")
@@ -247,20 +238,9 @@ class AccountHandler(BaseHandler):
                     return
                 break
         
-        result_list = await self.api.user_acc_list(platformId=event.get_sender_id())
-        if not self.is_success(result_list):
-            yield self.chain_reply(event, f"获取账号列表失败，错误代码：{self.get_error_msg(result_list)}")
-            return
-        
-        result_bind = await self.api.user_bind(platformId=event.get_sender_id(), frameworkToken=frameworkToken)
-        result_db_bind = await self.db_manager.upsert_user(
-            user=event.get_sender_id(), 
-            selection=len(result_list.get("data", [])) + 1, 
-            token=frameworkToken
-        )
-        
-        if not self.is_success(result_bind) or not result_db_bind:
-            yield self.chain_reply(event, f"绑定账号失败，错误代码：{self.get_error_msg(result_bind)}")
+        bind_success, bind_error = await self._bind_and_activate_account(event, frameworkToken)
+        if not bind_success:
+            yield self.chain_reply(event, bind_error)
             return
         
         yield self.chain_reply(event, "登录绑定成功！")
@@ -335,7 +315,7 @@ class AccountHandler(BaseHandler):
             yield self.chain_reply(event, f"获取账号列表失败，错误代码：{self.get_error_msg(result_list)}")
             return
         
-        accounts = result_list.get("data", [])
+        accounts = self.normalize_accounts_order(result_list.get("data", []))
         if not accounts:
             yield self.chain_reply(event, "您尚未绑定任何账号，请先使用登录命令绑定账号")
             return
@@ -444,7 +424,7 @@ class AccountHandler(BaseHandler):
             yield self.chain_reply(event, f"获取账号列表失败，错误代码：{self.get_error_msg(result_list)}")
             return
         
-        accounts = result_list.get("data", [])
+        accounts = self.normalize_accounts_order(result_list.get("data", []))
         if not accounts:
             yield self.chain_reply(event, "您尚未绑定任何账号，请先使用登录命令绑定账号")
             return
@@ -476,7 +456,7 @@ class AccountHandler(BaseHandler):
             yield self.chain_reply(event, f"获取账号列表失败，错误代码：{self.get_error_msg(result_list)}")
             return
         
-        accounts = result_list.get("data", [])
+        accounts = self.normalize_accounts_order(result_list.get("data", []))
         if not accounts:
             yield self.chain_reply(event, "您尚未绑定任何账号，请先使用登录命令绑定账号")
             return
@@ -517,7 +497,7 @@ class AccountHandler(BaseHandler):
             yield self.chain_reply(event, f"获取账号列表失败，错误代码：{self.get_error_msg(result_list)}")
             return
         
-        accounts = result_list.get("data", [])
+        accounts = self.normalize_accounts_order(result_list.get("data", []))
         if not accounts:
             yield self.chain_reply(event, "您尚未绑定任何账号，请先使用登录命令绑定账号")
             return
@@ -631,22 +611,11 @@ class AccountHandler(BaseHandler):
                 yield self.chain_reply(event, "获取登录信息失败，请重试！")
                 return
             
-            # 绑定账号
-            result_list = await self.api.user_acc_list(platformId=event.get_sender_id())
-            if not self.is_success(result_list):
-                yield self.chain_reply(event, f"获取账号列表失败：{self.get_error_msg(result_list)}")
-                return
-            result_bind = await self.api.user_bind(platformId=event.get_sender_id(), frameworkToken=framework_token)
-            result_db = await self.db_manager.upsert_user(
-                user=event.get_sender_id(),
-                selection=len(result_list.get("data", [])) + 1,
-                token=framework_token
-            )
-            
-            if self.is_success(result_bind) and result_db:
+            bind_success, bind_error = await self._bind_and_activate_account(event, framework_token)
+            if bind_success:
                 yield self.chain_reply(event, "✅ QQ OAuth授权登录成功！")
             else:
-                yield self.chain_reply(event, f"绑定账号失败：{self.get_error_msg(result_bind)}")
+                yield self.chain_reply(event, bind_error)
                 
         except Exception as e:
             yield self.chain_reply(event, f"OAuth登录失败：{e}")
@@ -685,21 +654,11 @@ class AccountHandler(BaseHandler):
                 yield self.chain_reply(event, "获取登录信息失败，请重试！")
                 return
             
-            result_list = await self.api.user_acc_list(platformId=event.get_sender_id())
-            if not self.is_success(result_list):
-                yield self.chain_reply(event, f"获取账号列表失败：{self.get_error_msg(result_list)}")
-                return
-            result_bind = await self.api.user_bind(platformId=event.get_sender_id(), frameworkToken=framework_token)
-            result_db = await self.db_manager.upsert_user(
-                user=event.get_sender_id(),
-                selection=len(result_list.get("data", [])) + 1,
-                token=framework_token
-            )
-            
-            if self.is_success(result_bind) and result_db:
+            bind_success, bind_error = await self._bind_and_activate_account(event, framework_token)
+            if bind_success:
                 yield self.chain_reply(event, "✅ 微信OAuth授权登录成功！")
             else:
-                yield self.chain_reply(event, f"绑定账号失败：{self.get_error_msg(result_bind)}")
+                yield self.chain_reply(event, bind_error)
                 
         except Exception as e:
             yield self.chain_reply(event, f"OAuth登录失败：{e}")

@@ -5,7 +5,7 @@ from astrbot.api.event import AstrMessageEvent
 from astrbot.api import logger
 import astrbot.api.message_components as Comp
 import urllib.parse
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any, Union, List
 from ..utils.render import Render
 
 
@@ -66,13 +66,29 @@ class BaseHandler:
             chain.extend(components)
         return event.chain_result(chain)
 
+    @staticmethod
+    def _account_category_order(account: Dict[str, Any]) -> int:
+        """统一账号展示/选择顺序，避免列表展示和实际取号不一致"""
+        token_type = account.get("tokenType", "").lower()
+        if token_type in ("qq", "wechat"):
+            return 0
+        if token_type == "wegame":
+            return 1
+        if token_type == "qqsafe":
+            return 2
+        return 3
+
+    def normalize_accounts_order(self, accounts: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """按统一规则排序账号，保持列表展示与选择逻辑一致"""
+        return sorted(accounts, key=self._account_category_order)
+
     async def get_active_token(self, event: AstrMessageEvent):
         """获取当前用户激活的 token"""
         result_list = await self.api.user_acc_list(platformId=event.get_sender_id())
         if not self.is_success(result_list):
             return None, f"获取账号列表失败：{self.get_error_msg(result_list)}"
         
-        accounts = result_list.get("data", [])
+        accounts = self.normalize_accounts_order(result_list.get("data", []))
         if not accounts:
             return None, "您尚未绑定任何账号，请先使用登录命令绑定账号"
         
@@ -100,7 +116,7 @@ class BaseHandler:
         if not self.is_success(result_list):
             return None, f"获取账号列表失败：{self.get_error_msg(result_list)}"
         
-        accounts = result_list.get("data", [])
+        accounts = self.normalize_accounts_order(result_list.get("data", []))
         if not accounts:
             return None, "您尚未绑定任何账号，请先使用登录命令绑定账号"
         
